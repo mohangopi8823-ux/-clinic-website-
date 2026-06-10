@@ -4,25 +4,28 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import type { Doctor } from '../../lib/supabase';
 
+const doctorPhotoPath = '/images/doctor-profile.jpeg';
+
 function DoctorCard({ doctor }: { doctor: Doctor }) {
   return (
     <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-      <div className="md:flex">
-        <div className="md:w-2/5 bg-gradient-to-br from-teal-500 to-teal-700 p-8 flex items-center justify-center">
-          <div className="text-center">
-            <div className="w-32 h-32 mx-auto rounded-full bg-white/20 backdrop-blur border-4 border-white/30 flex items-center justify-center mb-4">
-              <div className="w-28 h-28 rounded-full bg-gradient-to-br from-teal-100 to-teal-200 flex items-center justify-center">
-                <span className="text-4xl font-bold text-teal-600">
-                  {doctor.doctor_name?.charAt(0) || 'D'}
-                </span>
-              </div>
-            </div>
-            <h3 className="text-xl font-bold text-white">{doctor.doctor_name}</h3>
-            <p className="text-teal-100">{doctor.specialization}</p>
-          </div>
+      <div className="grid md:grid-cols-[minmax(0,0.42fr)_minmax(0,0.58fr)]">
+        <div className="bg-gradient-to-br from-teal-50 via-white to-blue-50 p-4 sm:p-6">
+          <img
+            src={doctorPhotoPath}
+            alt="Doctor profile photo"
+            className="h-80 w-full rounded-xl object-cover object-[center_30%] shadow-md sm:h-96 md:h-full md:min-h-[28rem]"
+          />
         </div>
 
-        <div className="md:w-3/5 p-8">
+        <div className="p-6 sm:p-8">
+          <div className="mb-6">
+            <h3 className="text-2xl font-bold text-gray-900">{doctor.doctor_name || 'Dr. Nalini T'}</h3>
+            <p className="mt-1 text-lg font-medium text-teal-700">
+              {doctor.specialization || 'Cardiology & Diabetology'}
+            </p>
+          </div>
+
           <div className="grid gap-4">
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 bg-teal-100 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -30,7 +33,9 @@ function DoctorCard({ doctor }: { doctor: Doctor }) {
               </div>
               <div>
                 <h4 className="font-medium text-gray-900">Qualification</h4>
-                <p className="text-gray-600 text-sm">{doctor.qualification || 'N/A'}</p>
+                <p className="text-gray-600 text-sm">
+                  {doctor.qualification || 'MBBS, PGDCC Clinical Cardiology, Diploma in Diabetology'}
+                </p>
               </div>
             </div>
 
@@ -41,7 +46,7 @@ function DoctorCard({ doctor }: { doctor: Doctor }) {
               <div>
                 <h4 className="font-medium text-gray-900">Experience</h4>
                 <p className="text-gray-600 text-sm">
-                  {doctor.experience_years ? `${doctor.experience_years}+ Years` : 'N/A'}
+                  {doctor.experience_years ? `${doctor.experience_years}+ Years` : '10+ Years'}
                 </p>
               </div>
             </div>
@@ -52,7 +57,7 @@ function DoctorCard({ doctor }: { doctor: Doctor }) {
               </div>
               <div>
                 <h4 className="font-medium text-gray-900">Contact</h4>
-                <p className="text-gray-600 text-sm">{doctor.phone || 'Contact clinic'}</p>
+                <p className="text-gray-600 text-sm">{doctor.phone || '096404 10062'}</p>
               </div>
             </div>
 
