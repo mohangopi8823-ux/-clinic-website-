@@ -18,8 +18,8 @@ export function AppointmentForm() {
   const [formData, setFormData] = useState({
     patient_name: '',
     patient_phone: '',
-    doctor_id: '',
-    service_id: '',
+    doctor: '',
+    service: '',
     appointment_date: '',
     appointment_time: '',
     symptoms: ''
@@ -139,8 +139,8 @@ export function AppointmentForm() {
     if (!formData.patient_name.trim()) newErrors.patient_name = 'Patient name is required';
     if (!formData.patient_phone.trim()) newErrors.patient_phone = 'Phone number is required';
     else if (!/^[0-9]{10}$/.test(formData.patient_phone)) newErrors.patient_phone = 'Enter valid 10-digit phone number';
-    if (!formData.doctor_id) newErrors.doctor_id = 'Please select a doctor';
-    if (!formData.service_id) newErrors.service_id = 'Please select a service';
+    if (!formData.doctor) newErrors.doctor = 'Please select a doctor';
+    if (!formData.service) newErrors.service = 'Please select a service';
     if (!formData.appointment_date) newErrors.appointment_date = 'Please select a date';
     if (!formData.appointment_time) newErrors.appointment_time = 'Please select a time';
 
@@ -160,8 +160,8 @@ export function AppointmentForm() {
       const { error } = await supabase.from('appointments').insert({
         patient_name: formData.patient_name,
         patient_phone: formData.patient_phone,
-        doctor_id: formData.doctor_id,
-        service_id: formData.service_id,
+        doctor: formData.doctor,
+        service: formData.service,
         appointment_date: formData.appointment_date,
         appointment_time: formData.appointment_time,
         symptoms: formData.symptoms || null,
@@ -170,13 +170,13 @@ export function AppointmentForm() {
 
       if (error) throw error;
 
-      const selectedDoctor = doctors.find(d => d.id === formData.doctor_id);
-      const selectedService = services.find(s => s.id === formData.service_id);
+      const selectedDoctor = doctors.find(d => d.doctor_name === formData.doctor);
+      const selectedService = services.find(s => s.service_name === formData.service);
 
       setAppointmentData({
         ...formData,
-        doctor: selectedDoctor?.doctor_name || 'Selected doctor',
-        service: selectedService?.service_name || 'Selected service',
+        doctor: selectedDoctor?.doctor_name || formData.doctor,
+        service: selectedService?.service_name || formData.service,
         doctorInfo: selectedDoctor,
         serviceInfo: selectedService
       });
@@ -337,21 +337,21 @@ Please confirm my appointment.`);
                 Select Doctor <span className="text-red-500">*</span>
               </label>
               <select
-                name="doctor_id"
-                value={formData.doctor_id}
+                name="doctor"
+                value={formData.doctor}
                 onChange={handleChange}
                 className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
-                  errors.doctor_id ? 'border-red-500' : 'border-gray-300'
+                  errors.doctor ? 'border-red-500' : 'border-gray-300'
                 }`}
               >
                 <option value="">{doctors.length === 0 ? 'No active doctors available' : 'Choose a doctor'}</option>
                 {doctors.map(doctor => (
-                  <option key={doctor.id} value={doctor.id}>
+                  <option key={doctor.id} value={doctor.doctor_name}>
                     {doctor.doctor_name} - {doctor.specialization}
                   </option>
                 ))}
               </select>
-              {errors.doctor_id && <p className="text-red-500 text-sm mt-1">{errors.doctor_id}</p>}
+              {errors.doctor && <p className="text-red-500 text-sm mt-1">{errors.doctor}</p>}
             </div>
 
             <div>
@@ -359,21 +359,21 @@ Please confirm my appointment.`);
                 Select Service <span className="text-red-500">*</span>
               </label>
               <select
-                name="service_id"
-                value={formData.service_id}
+                name="service"
+                value={formData.service}
                 onChange={handleChange}
                 className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
-                  errors.service_id ? 'border-red-500' : 'border-gray-300'
+                  errors.service ? 'border-red-500' : 'border-gray-300'
                 }`}
               >
                 <option value="">{services.length === 0 ? 'No active services available' : 'Choose a service'}</option>
                 {services.map(service => (
-                  <option key={service.id} value={service.id}>
+                  <option key={service.id} value={service.service_name}>
                     {service.service_name}
                   </option>
                 ))}
               </select>
-              {errors.service_id && <p className="text-red-500 text-sm mt-1">{errors.service_id}</p>}
+              {errors.service && <p className="text-red-500 text-sm mt-1">{errors.service}</p>}
             </div>
           </div>
 

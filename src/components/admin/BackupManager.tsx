@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Download, Trash2, AlertCircle, CheckCircle } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import type { Doctor, Service } from '../../lib/supabase';
 
 export function BackupManager() {
   const [fromDate, setFromDate] = useState('');
@@ -17,7 +18,7 @@ export function BackupManager() {
     try {
       let query = supabase
         .from('appointments')
-        .select('*, doctors(doctor_name), services(service_name)')
+        .select('*')
         .order('appointment_date', { ascending: false });
 
       if (fromDate) {
@@ -27,7 +28,13 @@ export function BackupManager() {
         query = query.lte('appointment_date', toDate);
       }
 
-      const { data, error } = await query;
+      const [appointmentsRes, doctorsRes, servicesRes] = await Promise.all([
+        query,
+        supabase.from('doctors').select('id, doctor_name'),
+        supabase.from('services').select('id, service_name')
+      ]);
+
+      const { data, error } = appointmentsRes;
 
       if (error) throw error;
 
@@ -36,6 +43,24 @@ export function BackupManager() {
         setDownloading(false);
         return;
       }
+
+      const doctorNames = ((doctorsRes.data || []) as Pick<Doctor, 'id' | 'doctor_name'>[]).reduce<Record<string, string>>(
+        (names, doctor) => {
+          names[doctor.id] = doctor.doctor_name;
+          names[doctor.doctor_name] = doctor.doctor_name;
+          return names;
+        },
+        {}
+      );
+
+      const serviceNames = ((servicesRes.data || []) as Pick<Service, 'id' | 'service_name'>[]).reduce<Record<string, string>>(
+        (names, service) => {
+          names[service.id] = service.service_name;
+          names[service.service_name] = service.service_name;
+          return names;
+        },
+        {}
+      );
 
       // Generate CSV
       const headers = [
@@ -57,9 +82,9 @@ export function BackupManager() {
           headers.map((header) => {
             const value =
               header === 'doctor'
-                ? apt.doctors?.doctor_name
+                ? doctorNames[apt.doctor || apt.doctor_id] || apt.doctor || apt.doctor_id
                 : header === 'service'
-                  ? apt.services?.service_name
+                  ? serviceNames[apt.service || apt.service_id] || apt.service || apt.service_id
                   : apt[header];
             if (value === null || value === undefined) return '';
             // Escape quotes and wrap in quotes if contains comma

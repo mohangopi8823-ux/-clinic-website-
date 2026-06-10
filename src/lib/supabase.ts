@@ -32,8 +32,8 @@ export type Appointment = {
   patient_phone: string;
   doctor?: string | null;
   service?: string | null;
-  doctor_id: string;
-  service_id: string;
+  doctor_id?: string | null;
+  service_id?: string | null;
   appointment_date: string;
   appointment_time: string;
   symptoms: string | null;

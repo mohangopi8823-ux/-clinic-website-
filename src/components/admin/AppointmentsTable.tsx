@@ -9,7 +9,7 @@ import {
   Save
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import type { Appointment } from '../../lib/supabase';
+import type { Appointment, Doctor, Service } from '../../lib/supabase';
 
 export function AppointmentsTable() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -20,6 +20,8 @@ export function AppointmentsTable() {
   const [showNotesModal, setShowNotesModal] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [loadMessage, setLoadMessage] = useState('');
+  const [doctorNames, setDoctorNames] = useState<Record<string, string>>({});
+  const [serviceNames, setServiceNames] = useState<Record<string, string>>({});
 
   useEffect(() => {
     fetchAppointments();
@@ -28,10 +30,16 @@ export function AppointmentsTable() {
   const fetchAppointments = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('appointments')
-        .select('*')
-        .order('created_at', { ascending: false });
+      const [appointmentsRes, doctorsRes, servicesRes] = await Promise.all([
+        supabase
+          .from('appointments')
+          .select('*')
+          .order('created_at', { ascending: false }),
+        supabase.from('doctors').select('id, doctor_name'),
+        supabase.from('services').select('id, service_name')
+      ]);
+
+      const { data, error } = appointmentsRes;
 
       if (error) {
         console.error('Error fetching appointments:', error);
@@ -39,6 +47,36 @@ export function AppointmentsTable() {
         setAppointments([]);
         setLoadMessage('Appointments are not available right now.');
         return;
+      }
+
+      if (doctorsRes.error) {
+        console.error('Error fetching doctors for appointment names:', doctorsRes.error);
+      } else {
+        setDoctorNames(
+          ((doctorsRes.data || []) as Pick<Doctor, 'id' | 'doctor_name'>[]).reduce<Record<string, string>>(
+            (names, doctor) => {
+              names[doctor.id] = doctor.doctor_name;
+              names[doctor.doctor_name] = doctor.doctor_name;
+              return names;
+            },
+            {}
+          )
+        );
+      }
+
+      if (servicesRes.error) {
+        console.error('Error fetching services for appointment names:', servicesRes.error);
+      } else {
+        setServiceNames(
+          ((servicesRes.data || []) as Pick<Service, 'id' | 'service_name'>[]).reduce<Record<string, string>>(
+            (names, service) => {
+              names[service.id] = service.service_name;
+              names[service.service_name] = service.service_name;
+              return names;
+            },
+            {}
+          )
+        );
       }
 
       console.log('Fetched appointments:', data);
@@ -104,12 +142,14 @@ export function AppointmentsTable() {
   };
 
   const generateWhatsAppConfirmation = (appointment: Appointment) => {
+    const doctorName = getDoctorName(appointment);
+    const serviceName = getServiceName(appointment);
     const message = `Hello ${appointment.patient_name},
 
 Your appointment at Amrutha Clinic is confirmed.
 
-Doctor: Dr. Nalini T
-Service: ${appointment.service || appointment.service_id || 'Selected service'}
+Doctor: ${doctorName}
+Service: ${serviceName}
 Date: ${appointment.appointment_date}
 Time: ${appointment.appointment_time}
 
@@ -150,11 +190,23 @@ Amrutha Clinic`;
     setShowNotesModal(true);
   };
 
+  const getDoctorName = (appointment: Appointment) => {
+    const value = appointment.doctor || appointment.doctor_id || '';
+    return doctorNames[value] || value || 'Doctor not found';
+  };
+
+  const getServiceName = (appointment: Appointment) => {
+    const value = appointment.service || appointment.service_id || '';
+    return serviceNames[value] || value || 'Service not found';
+  };
+
   const filteredAppointments = search.trim()
     ? appointments.filter(
         (apt) =>
           apt.patient_name.toLowerCase().includes(search.toLowerCase()) ||
-          apt.patient_phone.includes(search)
+          apt.patient_phone.includes(search) ||
+          getDoctorName(apt).toLowerCase().includes(search.toLowerCase()) ||
+          getServiceName(apt).toLowerCase().includes(search.toLowerCase())
       )
     : appointments;
 
@@ -221,12 +273,12 @@ Amrutha Clinic`;
                     </td>
                     <td className="px-4 py-4">
                       <p className="text-gray-600 text-sm">
-                        {apt.doctor || apt.doctor_id || 'Doctor not found'}
+                        {getDoctorName(apt)}
                       </p>
                     </td>
                     <td className="px-4 py-4">
                       <p className="text-gray-600 text-sm">
-                        {apt.service || apt.service_id || 'Service not found'}
+                        {getServiceName(apt)}
                       </p>
                     </td>
                     <td className="px-4 py-4">
