@@ -1,8 +1,15 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Award, Calendar, Phone, MapPin, Clock, GraduationCap, Briefcase, Users } from 'lucide-react';
+import { Award, Calendar, Phone, Clock, GraduationCap, Briefcase, Users } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import type { Doctor } from '../../lib/supabase';
+
+const doctorPhotoPath = '/images/doctor-profile.jpeg';
+
+function formatDoctorName(name?: string | null) {
+  if (!name) return 'Dr. Nalini T';
+  return name.trim().toLowerCase().startsWith('dr.') ? name : `Dr. ${name}`;
+}
 
 export function DoctorProfile() {
   const [doctor, setDoctor] = useState<Doctor | null>(null);
@@ -59,44 +66,35 @@ export function DoctorProfile() {
             Our Doctor
           </span>
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Meet Your Healthcare Partner
+            Meet Our Doctor
           </h2>
         </div>
 
-        <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
-          <div className="md:flex">
-            <div className="md:w-2/5 bg-gradient-to-br from-teal-500 to-teal-700 p-8 md:p-12 flex items-center justify-center">
-              <div className="text-center">
-                <div className="w-40 h-40 md:w-52 md:h-52 mx-auto rounded-full bg-white/20 backdrop-blur border-4 border-white/30 flex items-center justify-center mb-6">
-                  <div className="w-36 h-36 md:w-48 md:h-48 rounded-full bg-gradient-to-br from-teal-100 to-teal-200 flex items-center justify-center">
-                    <span className="text-5xl md:text-6xl font-bold text-teal-600">
-                      {doctor?.doctor_name?.charAt(0) || 'D'}
-                    </span>
-                  </div>
-                </div>
-                <h3 className="text-2xl md:text-3xl font-bold text-white mb-2">
-                  {doctor?.doctor_name || 'Dr. Nalini T'}
-                </h3>
-                <p className="text-teal-100 text-lg">{doctor?.specialization || 'Cardiology & Diabetology'}</p>
-                {loadMessage && (
-                  <p className="text-teal-50 text-sm mt-3">{loadMessage}</p>
-                )}
-
-                <div className="flex items-center justify-center gap-4 mt-6">
-                  <div className="bg-white/20 rounded-full p-3">
-                    <Award className="w-6 h-6 text-white" />
-                  </div>
-                  <div className="bg-white/20 rounded-full p-3">
-                    <GraduationCap className="w-6 h-6 text-white" />
-                  </div>
-                  <div className="bg-white/20 rounded-full p-3">
-                    <Briefcase className="w-6 h-6 text-white" />
-                  </div>
-                </div>
+        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+          <div className="grid lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+            <div className="p-5 sm:p-6 md:p-8 bg-gradient-to-br from-teal-50 via-white to-blue-50">
+              <div className="rounded-2xl bg-white p-3 shadow-lg">
+                <img
+                  src={doctorPhotoPath}
+                  alt="Doctor profile photo"
+                  className="h-80 w-full rounded-xl object-cover object-[center_30%] sm:h-96 lg:h-[30rem]"
+                />
               </div>
             </div>
 
-            <div className="md:w-3/5 p-8 md:p-12">
+            <div className="p-6 sm:p-8 md:p-12">
+              <div className="mb-8">
+                <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+                  {formatDoctorName(doctor?.doctor_name)}
+                </h3>
+                <p className="text-lg font-medium text-teal-700">
+                  {doctor?.specialization || 'Cardiology & Diabetology'}
+                </p>
+                {loadMessage && (
+                  <p className="text-sm text-gray-500 mt-3">{loadMessage}</p>
+                )}
+              </div>
+
               <div className="grid gap-6">
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 bg-teal-100 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -112,11 +110,11 @@ export function DoctorProfile() {
 
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <Award className="w-6 h-6 text-blue-600" />
+                    <Briefcase className="w-6 h-6 text-blue-600" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-900 mb-1">Medical Registration</h4>
-                    <p className="text-gray-600">Reg. No: 72441</p>
+                    <h4 className="font-semibold text-gray-900 mb-1">Specialization</h4>
+                    <p className="text-gray-600">{doctor?.specialization || 'Cardiology & Diabetology'}</p>
                   </div>
                 </div>
 
@@ -147,18 +145,18 @@ export function DoctorProfile() {
 
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 bg-pink-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <MapPin className="w-6 h-6 text-pink-600" />
+                    <Award className="w-6 h-6 text-pink-600" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-900 mb-1">Location</h4>
-                    <p className="text-gray-600">B.N Reddy Nagar, Hyderabad</p>
+                    <h4 className="font-semibold text-gray-900 mb-1">Medical Registration</h4>
+                    <p className="text-gray-600">Reg. No: 72441</p>
                   </div>
                 </div>
               </div>
 
               <div className="flex flex-wrap gap-4 mt-8">
                 <Link
-                  to="/appointment"
+                  to="/appointment#appointment-form"
                   className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-xl hover:bg-teal-700 transition-colors font-medium"
                 >
                   <Calendar className="w-5 h-5" />

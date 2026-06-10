@@ -79,8 +79,12 @@ export function Hero() {
 
               <div className="relative bg-white rounded-2xl shadow-xl p-6 md:p-8">
                 <div className="flex items-center justify-center mb-6">
-                  <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center">
-                    <Heart className="w-12 h-12 md:w-16 md:h-16 text-white" />
+                  <div className="w-32 h-32 md:w-40 md:h-40 rounded-2xl bg-white p-2 shadow-lg">
+                    <img
+                      src="/images/doctor-profile.jpeg"
+                      alt="Doctor profile photo"
+                      className="h-full w-full rounded-xl object-cover object-[center_30%]"
+                    />
                   </div>
                 </div>
 

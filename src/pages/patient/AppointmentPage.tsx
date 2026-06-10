@@ -1,8 +1,22 @@
 import { AppointmentForm } from '../../components/patient/AppointmentForm';
-import { Link } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { ArrowLeft, Phone, MessageCircle, Clock } from 'lucide-react';
 
 export function AppointmentPage() {
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.hash === '#appointment-form') {
+      window.requestAnimationFrame(() => {
+        document.getElementById('appointment-form')?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        });
+      });
+    }
+  }, [location.hash]);
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
@@ -15,7 +29,7 @@ export function AppointmentPage() {
         </div>
       </section>
 
-      <section className="py-12">
+      <section id="appointment-form" className="py-12 scroll-mt-20">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Quick Info */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
